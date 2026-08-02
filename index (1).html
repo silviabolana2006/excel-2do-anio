@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excel para 2° Año — Aprendé haciendo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F6EF;
+  --paper-line:#D7DED6;
+  --ink:#1C2B2A;
+  --ink-soft:#4B5B58;
+  --teal:#0F6B5C;
+  --teal-dark:#0A4E44;
+  --coral:#E4572E;
+  --yellow:#F2B705;
+  --panel:#FFFFFF;
+  --cell-active:#FFF1C4;
+  --cell-error:#FCDDD4;
+  --radius:10px;
+  --shadow: 0 2px 10px rgba(15,60,50,0.08);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    linear-gradient(var(--paper-line) 1px, transparent 1px) 0 0/100% 28px,
+    linear-gradient(90deg, var(--paper-line) 1px, transparent 1px) 0 0/28px 100%,
+    var(--paper);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  min-height:100vh;
+}
+.mono{font-family:'JetBrains Mono',monospace;}
+.display{font-family:'Space Grotesk',sans-serif;}
+
+/* ---- App shell ---- */
+.app{max-width:1180px;margin:0 auto;padding:22px 20px 60px;}
+
+header.top{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--panel);
+  border:1px solid var(--paper-line);
+  border-radius:var(--radius);
+  padding:14px 20px;
+  box-shadow:var(--shadow);
+  margin-bottom:18px;
+  flex-wrap:wrap;
+  gap:12px;
+}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-mark{
+  width:40px;height:40px;border-radius:8px;
+  background:var(--teal);
+  display:flex;align-items:center;justify-content:center;
+  color:white;font-family:'JetBrains Mono',monospace;font-weight:700;
+  font-size:13px;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.15);
+}
+.brand-text .eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal-dark);font-weight:600;}
+.brand-text h1{font-family:'Space Grotesk',sans-serif;font-size:19px;margin:2px 0 0;}
+.formula-preview{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  background:#F1F3EC;
+  border:1px solid var(--paper-line);
+  border-radius:7px;
+  padding:6px 12px;
+  color:var(--teal-dark);
+  min-width:230px;
+}
+.formula-preview .fx{color:var(--coral);font-weight:700;margin-right:6px;}
+
+nav.tabs{
+  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;
+}
+nav.tabs button{
+  font-family:'Inter',sans-serif;
+  font-weight:600;font-size:13.5px;
+  padding:9px 14px;
+  border-radius:8px;
+  border:1px solid var(--paper-line);
+  background:var(--panel);
+  color:var(--ink-soft);
+  cursor:pointer;
+  transition:all .15s ease;
+}
+nav.tabs button:hover{border-color:var(--teal);color:var(--teal-dark);}
+nav.tabs button.active{
+  background:var(--teal);color:white;border-color:var(--teal);
+}
+
+.layout{display:grid;grid-template-columns:250px 1fr;gap:18px;align-items:start;}
+@media (max-width:820px){.layout{grid-template-columns:1fr;}}
+
+.sidebar{
+  background:var(--panel);
+  border:1px solid var(--paper-line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:14px;
+  position:sticky;top:16px;
+}
+.sidebar h3{font-family:'Space Grotesk',sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:4px 6px 10px;}
+.lesson-item{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:9px 8px;border-radius:8px;cursor:pointer;
+  font-size:13.5px;color:var(--ink);
+  border-left:3px solid transparent;
+}
+.lesson-item:hover{background:#F1F3EC;}
+.lesson-item.active{background:#EAF3F0;border-left-color:var(--teal);font-weight:600;}
+.lesson-num{
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  color:var(--teal-dark);background:#EAF3F0;
+  border-radius:5px;padding:2px 6px;flex-shrink:0;margin-top:1px;
+}
+.lesson-item.done .lesson-num{background:var(--teal);color:white;}
+
+main.content{
+  background:var(--panel);
+  border:1px solid var(--paper-line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:26px 30px;
+  min-height:520px;
+}
+section{display:none;}
+section.active{display:block;animation:fadein .25s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+.section-eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--coral);font-weight:700;margin-bottom:6px;}
+h2.lesson-title{font-family:'Space Grotesk',sans-serif;font-size:26px;margin:0 0 14px;}
+p{line-height:1.6;color:var(--ink);}
+.lead{font-size:15.5px;color:var(--ink-soft);margin-bottom:20px;}
+
+.callout{
+  border-left:4px solid var(--teal);
+  background:#F1F6F3;
+  border-radius:0 8px 8px 0;
+  padding:12px 16px;
+  margin:16px 0;
+  font-size:14px;
+}
+.callout.tip::before{content:"💡 Tip — ";font-weight:700;color:var(--teal-dark);}
+.callout.warn{border-left-color:var(--coral);background:#FDF1EC;}
+.callout.warn::before{content:"⚠ Ojo — ";font-weight:700;color:var(--coral);}
+
+.demo-grid{
+  border:1px solid var(--paper-line);
+  border-radius:8px;
+  overflow:hidden;
+  margin:16px 0;
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+}
+.demo-grid table{border-collapse:collapse;width:100%;}
+.demo-grid th,.demo-grid td{
+  border:1px solid var(--paper-line);
+  padding:7px 10px;text-align:center;
+}
+.demo-grid th{background:#EFF2E9;color:var(--ink-soft);font-family:'Inter',sans-serif;font-weight:600;font-size:12px;}
+.demo-grid td.rowhead{background:#EFF2E9;font-family:'Inter',sans-serif;font-weight:600;color:var(--ink-soft);}
+.demo-grid td.hl{background:var(--cell-active);font-weight:700;}
+
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--teal);color:white;border:none;
+  font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;
+  padding:10px 16px;border-radius:8px;cursor:pointer;
+  transition:background .15s ease;
+}
+.btn:hover{background:var(--teal-dark);}
+.btn.secondary{background:transparent;color:var(--teal-dark);border:1px solid var(--teal);}
+.btn.secondary:hover{background:#EAF3F0;}
+.lesson-nav{display:flex;justify-content:space-between;margin-top:26px;padding-top:16px;border-top:1px solid var(--paper-line);}
+
+/* ---- Practice grid ---- */
+.practice-toolbar{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;
+}
+.ref-badge{
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  background:var(--teal);color:white;border-radius:6px;
+  padding:6px 10px;font-size:13px;min-width:46px;text-align:center;
+}
+.formula-input{
+  flex:1;min-width:220px;
+  font-family:'JetBrains Mono',monospace;font-size:13.5px;
+  padding:8px 12px;border:1px solid var(--paper-line);border-radius:7px;
+  background:#FBFBF7;
+}
+.formula-input:focus{outline:2px solid var(--teal);outline-offset:1px;}
+
+.grid-wrap{overflow-x:auto;border:1px solid var(--paper-line);border-radius:8px;}
+table.sheet{border-collapse:collapse;width:100%;font-family:'JetBrains Mono',monospace;font-size:13px;}
+table.sheet th{
+  background:#EFF2E9;color:var(--ink-soft);font-family:'Inter',sans-serif;
+  font-weight:600;font-size:12px;padding:6px;border:1px solid var(--paper-line);
+  min-width:78px;
+}
+table.sheet td.rowhead{background:#EFF2E9;font-family:'Inter',sans-serif;font-weight:600;color:var(--ink-soft);text-align:center;width:32px;border:1px solid var(--paper-line);}
+table.sheet td.cell{
+  border:1px solid var(--paper-line);
+  padding:0;height:32px;position:relative;
+}
+table.sheet td.cell .inner{
+  width:100%;height:100%;padding:5px 8px;
+  outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  cursor:cell;
+}
+table.sheet td.cell.selected{background:var(--cell-active);outline:2px solid var(--yellow);outline-offset:-2px;}
+table.sheet td.cell.err .inner{color:var(--coral);}
+table.sheet td.cell .inner:focus{background:#fff;}
+
+.exercise-card{
+  background:#F1F6F3;border:1px solid #D8E7E1;border-radius:9px;
+  padding:14px 16px;margin:16px 0;font-size:14px;
+}
+.exercise-card .ex-label{font-weight:700;color:var(--teal-dark);font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.check-row{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;}
+.result-msg{font-size:13.5px;font-weight:600;}
+.result-msg.ok{color:var(--teal-dark);}
+.result-msg.bad{color:var(--coral);}
+
+/* ---- Quiz ---- */
+.quiz-q{margin-bottom:22px;}
+.quiz-q p.qtext{font-weight:600;font-size:15px;margin-bottom:10px;}
+.quiz-options{display:flex;flex-direction:column;gap:8px;}
+.quiz-options label{
+  display:flex;align-items:center;gap:9px;
+  border:1px solid var(--paper-line);border-radius:8px;padding:9px 12px;
+  cursor:pointer;font-size:14px;transition:border-color .15s;
+}
+.quiz-options label:hover{border-color:var(--teal);}
+.quiz-options input{accent-color:var(--teal);}
+.quiz-score{
+  font-family:'Space Grotesk',sans-serif;font-size:20px;
+  background:#F1F6F3;border-radius:9px;padding:16px 20px;margin-top:10px;
+  display:none;
+}
+.quiz-score.show{display:block;}
+
+/* ---- Home hero ---- */
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:26px;align-items:center;}
+@media (max-width:820px){.hero{grid-template-columns:1fr;}}
+.hero h2{font-family:'Space Grotesk',sans-serif;font-size:30px;line-height:1.15;margin:0 0 12px;}
+.hero .sub{color:var(--ink-soft);font-size:15px;margin-bottom:20px;}
+.hero-grid-demo{border:1px solid var(--paper-line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);}
+.hero-grid-demo .fxbar{
+  display:flex;align-items:center;gap:8px;background:#EFF2E9;
+  padding:8px 10px;border-bottom:1px solid var(--paper-line);
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;
+}
+.hero-grid-demo .fxbar .ref{background:white;border:1px solid var(--paper-line);border-radius:4px;padding:2px 8px;font-weight:700;color:var(--teal-dark);}
+.hero-grid-demo .fxbar .fxsym{color:var(--coral);font-weight:700;}
+#typed-formula{color:var(--ink);}
+.cursor-blink{display:inline-block;width:7px;height:14px;background:var(--teal);margin-left:1px;vertical-align:-2px;animation:blink 1s step-end infinite;}
+@keyframes blink{50%{opacity:0;}}
+
+.step-list{list-style:none;padding:0;margin:22px 0 0;counter-reset:step;}
+.step-list li{
+  counter-increment:step;
+  display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--paper-line);
+  font-size:14px;
+}
+.step-list li::before{
+  content:counter(step);
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  background:var(--teal);color:white;border-radius:50%;
+  width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;
+}
+
+footer.note{text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark mono">fx</div>
+      <div class="brand-text">
+        <div class="eyebrow">2° Año — Informática</div>
+        <h1>Excel: aprendé haciendo</h1>
+      </div>
+    </div>
+    <div class="formula-preview"><span class="fx">fx</span><span id="live-formula">=PROMEDIO(A1:A5)</span></div>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Recorrido</h3>
+      <div id="lesson-list"></div>
+    </aside>
+
+    <main class="content">
+
+      <section id="sec-inicio" class="active">
+        <div class="hero">
+          <div>
+            <div class="section-eyebrow">Bienvenida</div>
+            <h2>Una planilla de cálculo es una calculadora gigante con memoria.</h2>
+            <p class="sub">En esta app vas a aprender Excel probando fórmulas de verdad, no solo leyendo. Cada lección tiene una explicación corta y un ejercicio para resolver en una planilla que funciona de verdad, ahí mismo en la página.</p>
+            <ul class="step-list">
+              <li>Recorré las lecciones en orden, de la barra de la izquierda.</li>
+              <li>Probá cada fórmula en la pestaña <strong>Práctica</strong>.</li>
+              <li>Cerrá con el <strong>Quiz</strong> para ver cuánto aprendiste.</li>
+            </ul>
+            <div style="margin-top:22px;">
+              <button class="btn" onclick="goToLesson(1)">Empezar la lección 1 →</button>
+            </div>
+          </div>
+          <div class="hero-grid-demo">
+            <div class="fxbar">
+              <span class="ref">A6</span>
+              <span class="fxsym">fx</span>
+              <span id="typed-formula"></span><span class="cursor-blink"></span>
+            </div>
+            <table class="demo-grid" style="margin:0;">
+              <tr><th></th><th>A</th><th>B</th></tr>
+              <tr><td class="rowhead">1</td><td>12</td><td>Lengua</td></tr>
+              <tr><td class="rowhead">2</td><td>15</td><td>Matemática</td></tr>
+              <tr><td class="rowhead">3</td><td>9</td><td>Historia</td></tr>
+              <tr><td class="rowhead">4</td><td>18</td><td>Biología</td></tr>
+              <tr><td class="rowhead">5</td><td>14</td><td>Inglés</td></tr>
+              <tr><td class="rowhead">6</td><td class="hl" id="hero-result">—</td><td>Promedio</td></tr>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="sec-l1">
+        <div class="section-eyebrow">Lección 1</div>
+        <h2 class="lesson-title">¿Qué es una planilla de cálculo?</h2>
+        <p class="lead">Excel organiza la información en una grilla de <strong>filas</strong> (números) y <strong>columnas</strong> (letras). Donde se cruzan, hay una <strong>celda</strong>.</p>
+        <p>Cada celda tiene una dirección única, llamada <strong>referencia</strong>: la letra de su columna seguida del número de su fila. Por ejemplo, la celda que está en la columna B y la fila 3 se llama <span class="mono">B3</span>.</p>
+        <div class="demo-grid">
+          <table>
+            <tr><th></th><th>A</th><th>B</th><th>C</th></tr>
+            <tr><td class="rowhead">1</td><td>A1</td><td>B1</td><td>C1</td></tr>
+            <tr><td class="rowhead">2</td><td>A2</td><td>B2</td><td>C2</td></tr>
+            <tr><td class="rowhead">3</td><td>A3</td><td class="hl">B3</td><td>C3</td></tr>
+          </table>
+        </div>
+        <div class="callout tip">Pensá la grilla como el mapa de un cine: la fila es el número de asiento y la columna es la letra de la sección. B3 es "sección B, asiento 3".</div>
+        <p>En una celda podés escribir tres tipos de cosas:</p>
+        <ul>
+          <li><strong>Texto</strong>: nombres, títulos, etiquetas (ej: "Matemática").</li>
+          <li><strong>Números</strong>: cantidades, notas, precios (ej: 8.5).</li>
+          <li><strong>Fórmulas</strong>: siempre empiezan con el signo <span class="mono">=</span> y le piden a Excel que calcule algo.</li>
+        </ul>
+        <div class="lesson-nav">
+          <span></span>
+          <button class="btn" onclick="goToLesson(2)">Siguiente: Referencias de celda →</button>
+        </div>
+      </section>
+
+      <section id="sec-l2">
+        <div class="section-eyebrow">Lección 2</div>
+        <h2 class="lesson-title">Referencias y rangos</h2>
+        <p class="lead">Un <strong>rango</strong> es un grupo de celdas seguidas. Se escribe con la primera celda, dos puntos, y la última: <span class="mono">A1:A5</span> significa "desde A1 hasta A5".</p>
+        <div class="demo-grid">
+          <table>
+            <tr><th></th><th>A</th></tr>
+            <tr><td class="rowhead">1</td><td class="hl">12</td></tr>
+            <tr><td class="rowhead">2</td><td class="hl">15</td></tr>
+            <tr><td class="rowhead">3</td><td class="hl">9</td></tr>
+            <tr><td class="rowhead">4</td><td class="hl">18</td></tr>
+            <tr><td class="rowhead">5</td><td class="hl">14</td></tr>
+          </table>
+        </div>
+        <p>El rango marcado arriba es <span class="mono">A1:A5</span>. También se pueden armar rangos en dos dimensiones, como <span class="mono">A1:B5</span>, que toma dos columnas enteras.</p>
+        <div class="callout tip">Nunca hace falta escribir el número que ves en la celda dentro de una fórmula. Si el precio está en B2, escribí <span class="mono">B2</span>, no el número. Así, si cambiás el precio, el resultado se actualiza solo.</div>
+        <div class="lesson-nav">
+          <button class="btn secondary" onclick="goToLesson(1)">← Anterior</button>
+          <button class="btn" onclick="goToLesson(3)">Siguiente: Operaciones básicas →</button>
+        </div>
+      </section>
+
+      <section id="sec-l3">
+        <div class="section-eyebrow">Lección 3</div>
+        <h2 class="lesson-title">Tu primera fórmula: operaciones básicas</h2>
+        <p class="lead">Toda fórmula arranca con <span class="mono">=</span>. Después podés combinar celdas con estos operadores:</p>
+        <div class="demo-grid">
+          <table>
+            <tr><th>Operación</th><th>Símbolo</th><th>Ejemplo</th></tr>
+            <tr><td>Suma</td><td class="hl">+</td><td>=A1+A2</td></tr>
+            <tr><td>Resta</td><td class="hl">-</td><td>=A1-A2</td></tr>
+            <tr><td>Multiplicación</td><td class="hl">*</td><td>=A1*A2</td></tr>
+            <tr><td>División</td><td class="hl">/</td><td>=A1/A2</td></tr>
+          </table>
+        </div>
+        <p>Podés combinar varias operaciones y usar paréntesis para decidir qué se calcula primero, igual que en matemática: <span class="mono">=(A1+A2)/2</span> primero suma y después divide.</p>
+        <div class="callout warn">Si Excel prioriza mal el orden que vos querés, agregá paréntesis. <span class="mono">=A1+A2/2</span> no es lo mismo que <span class="mono">=(A1+A2)/2</span>.</div>
+        <div class="exercise-card">
+          <div class="ex-label">Ejercicio 1</div>
+          Andá a la pestaña <strong>Práctica</strong>. En la celda <span class="mono">B1</span> escribí una fórmula que sume el contenido de <span class="mono">A1</span> y <span class="mono">A2</span>.
+        </div>
+        <div class="lesson-nav">
+          <button class="btn secondary" onclick="goToLesson(2)">← Anterior</button>
+          <button class="btn" onclick="goToLesson(4)">Siguiente: Funciones →</button>
+        </div>
+      </section>
+
+      <section id="sec-l4">
+        <div class="section-eyebrow">Lección 4</div>
+        <h2 class="lesson-title">Funciones: SUMA, PROMEDIO, MAX, MIN, CONTAR</h2>
+        <p class="lead">Una <strong>función</strong> es una fórmula lista para usar. En vez de escribir =A1+A2+A3+A4+A5, le decís a Excel qué querés hacer y sobre qué rango.</p>
+        <div class="demo-grid">
+          <table>
+            <tr><th>Función</th><th>Qué hace</th><th>Ejemplo</th></tr>
+            <tr><td class="mono">SUMA</td><td>Suma todos los valores del rango</td><td class="mono">=SUMA(A1:A5)</td></tr>
+            <tr><td class="mono">PROMEDIO</td><td>Calcula el promedio (media)</td><td class="mono">=PROMEDIO(A1:A5)</td></tr>
+            <tr><td class="mono">MAX</td><td>Devuelve el valor más alto</td><td class="mono">=MAX(A1:A5)</td></tr>
+            <tr><td class="mono">MIN</td><td>Devuelve el valor más bajo</td><td class="mono">=MIN(A1:A5)</td></tr>
+            <tr><td class="mono">CONTAR</td><td>Cuenta cuántas celdas tienen números</td><td class="mono">=CONTAR(A1:A5)</td></tr>
+          </table>
+        </div>
+        <div class="callout tip">Toda función se escribe igual: nombre + paréntesis + el rango adentro. Si te olvidás el paréntesis de cierre, Excel te va a avisar con un error.</div>
+        <div class="exercise-card">
+          <div class="ex-label">Ejercicio 2</div>
+          En <strong>Práctica</strong> ya tenés notas cargadas en la columna A (filas 1 a 5). En <span class="mono">B1</span> calculá el <strong>promedio</strong> con la función correspondiente.
+        </div>
+        <div class="lesson-nav">
+          <button class="btn secondary" onclick="goToLesson(3)">← Anterior</button>
+          <button class="btn" onclick="goToLesson(5)">Siguiente: Errores comunes →</button>
+        </div>
+      </section>
+
+      <section id="sec-l5">
+        <div class="section-eyebrow">Lección 5</div>
+        <h2 class="lesson-title">Errores comunes (y cómo evitarlos)</h2>
+        <div class="demo-grid">
+          <table>
+            <tr><th>Error</th><th>Por qué pasa</th></tr>
+            <tr><td class="mono">#DIV/0!</td><td>Estás dividiendo por una celda vacía o con 0</td></tr>
+            <tr><td class="mono">#REF!</td><td>La fórmula apunta a una celda que ya no existe</td></tr>
+            <tr><td class="mono">#NOMBRE?</td><td>Escribiste mal el nombre de una función</td></tr>
+            <tr><td class="mono">#VALOR!</td><td>Mezclaste texto y números donde Excel esperaba solo números</td></tr>
+          </table>
+        </div>
+        <p>Otro error clásico que <em>no</em> muestra un mensaje: escribir el número en vez de la referencia. Si escribís <span class="mono">=12+15</span> en lugar de <span class="mono">=A1+A2</span>, la fórmula funciona, pero deja de "escuchar" a la planilla — si cambiás A1, el resultado no se actualiza.</p>
+        <div class="callout warn">Antes de entregar un trabajo, revisá que ninguna celda tenga un número escrito "a mano" donde debería haber una referencia.</div>
+        <div class="lesson-nav">
+          <button class="btn secondary" onclick="goToLesson(4)">← Anterior</button>
+          <button class="btn" onclick="goToLesson(6)">Siguiente: Practicá todo junto →</button>
+        </div>
+      </section>
+
+      <section id="sec-l6">
+        <div class="section-eyebrow">Lección 6</div>
+        <h2 class="lesson-title">Poné todo en práctica</h2>
+        <p class="lead">Llegó el momento de armar una planillita de notas completa vos solo. Seguí los pasos en la pestaña <strong>Práctica</strong>.</p>
+        <div class="exercise-card">
+          <div class="ex-label">Desafío final</div>
+          1. Cargá 5 notas en <span class="mono">A1:A5</span>.<br>
+          2. En <span class="mono">B1</span> calculá el promedio con <span class="mono">PROMEDIO</span>.<br>
+          3. En <span class="mono">B2</span> calculá la nota máxima con <span class="mono">MAX</span>.<br>
+          4. En <span class="mono">B3</span> calculá la nota mínima con <span class="mono">MIN</span>.<br>
+          5. En <span class="mono">B4</span> contá cuántas notas cargaste con <span class="mono">CONTAR</span>.
+        </div>
+        <div class="callout tip">Cuando termines, andá al <strong>Quiz</strong> para poner a prueba lo que aprendiste.</div>
+        <div class="lesson-nav">
+          <button class="btn secondary" onclick="goToLesson(5)">← Anterior</button>
+          <button class="btn" onclick="goToTab('practica')">Ir a Práctica →</button>
+        </div>
+      </section>
+
+      <section id="sec-practica">
+        <div class="section-eyebrow">Zona de práctica</div>
+        <h2 class="lesson-title">Planilla interactiva</h2>
+        <p class="lead">Hacé clic en una celda y escribí un valor o una fórmula (empezá con <span class="mono">=</span>). Funciones disponibles: <span class="mono">SUMA</span>, <span class="mono">PROMEDIO</span>, <span class="mono">MAX</span>, <span class="mono">MIN</span>, <span class="mono">CONTAR</span>, y los operadores <span class="mono">+ - * / ()</span>.</p>
+        <div class="practice-toolbar">
+          <div class="ref-badge mono" id="active-ref">A1</div>
+          <input class="formula-input mono" id="formula-input" placeholder="Escribí un valor o una fórmula, ej: =PROMEDIO(A1:A5)">
+        </div>
+        <div class="grid-wrap">
+          <table class="sheet" id="sheet"></table>
+        </div>
+        <div class="check-row">
+          <button class="btn secondary" onclick="loadSampleData()">Cargar notas de ejemplo</button>
+          <button class="btn secondary" onclick="clearSheet()">Vaciar planilla</button>
+        </div>
+      </section>
+
+      <section id="sec-quiz">
+        <div class="section-eyebrow">Cierre</div>
+        <h2 class="lesson-title">Quiz final</h2>
+        <p class="lead">5 preguntas para repasar lo que viste. Elegí una opción por pregunta y hacé clic en "Corregir".</p>
+        <div id="quiz-container"></div>
+        <button class="btn" onclick="checkQuiz()">Corregir</button>
+        <div class="quiz-score" id="quiz-score"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="note">Excel para 2° año · Informática · hecho para practicar en clase</footer>
+</div>
+
+<script>
+/* ---------------- Navigation ---------------- */
+const tabsDef = [
+  {id:'inicio', label:'Inicio'},
+  {id:'l1', label:'Lección 1', lesson:1},
+  {id:'l2', label:'Lección 2', lesson:2},
+  {id:'l3', label:'Lección 3', lesson:3},
+  {id:'l4', label:'Lección 4', lesson:4},
+  {id:'l5', label:'Lección 5', lesson:5},
+  {id:'l6', label:'Lección 6', lesson:6},
+  {id:'practica', label:'Práctica'},
+  {id:'quiz', label:'Quiz'},
+];
+const lessonList = [
+  {n:1, id:'l1', title:'¿Qué es una planilla?'},
+  {n:2, id:'l2', title:'Referencias y rangos'},
+  {n:3, id:'l3', title:'Operaciones básicas'},
+  {n:4, id:'l4', title:'Funciones esenciales'},
+  {n:5, id:'l5', title:'Errores comunes'},
+  {n:6, id:'l6', title:'Practicá todo junto'},
+];
+const tabsEl = document.getElementById('tabs');
+const lessonListEl = document.getElementById('lesson-list');
+const doneLessons = new Set();
+
+tabsDef.forEach(t=>{
+  const b = document.createElement('button');
+  b.textContent = t.label;
+  b.dataset.id = t.id;
+  b.onclick = ()=>goToTab(t.id);
+  tabsEl.appendChild(b);
+});
+
+lessonList.forEach(l=>{
+  const d = document.createElement('div');
+  d.className = 'lesson-item';
+  d.dataset.id = l.id;
+  d.onclick = ()=>goToTab(l.id);
+  d.innerHTML = `<span class="lesson-num">${l.n}</span><span>${l.title}</span>`;
+  lessonListEl.appendChild(d);
+});
+
+function goToTab(id){
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.id===id));
+  document.querySelectorAll('.lesson-item').forEach(li=>li.classList.toggle('active', li.dataset.id===id));
+  const lessonDef = tabsDef.find(t=>t.id===id);
+  if(lessonDef && lessonDef.lesson){
+    doneLessons.add(id);
+    document.querySelector(`.lesson-item[data-id="${id}"]`)?.classList.add('done');
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function goToLesson(n){ goToTab('l'+n); }
+goToTab('inicio');
+
+/* ---------------- Hero typing animation ---------------- */
+const heroFormula = "=PROMEDIO(A1:A5)";
+const typedEl = document.getElementById('typed-formula');
+const liveFormulaEl = document.getElementById('live-formula');
+let ti = 0;
+function typeHero(){
+  if(ti <= heroFormula.length){
+    typedEl.textContent = heroFormula.slice(0, ti);
+    ti++;
+    setTimeout(typeHero, 90);
+  } else {
+    document.getElementById('hero-result').textContent = '13.6';
+    setTimeout(()=>{ ti=0; typedEl.textContent=''; document.getElementById('hero-result').textContent='—'; setTimeout(typeHero, 600);}, 1800);
+  }
+}
+typeHero();
+
+/* ---------------- Spreadsheet engine ---------------- */
+const COLS = ['A','B','C','D','E','F'];
+const ROWS = 10;
+const data = {}; // ref -> raw string
+let selectedRef = 'A1';
+
+function buildSheet(){
+  const table = document.getElementById('sheet');
+  table.innerHTML = '';
+  const headRow = document.createElement('tr');
+  headRow.appendChild(document.createElement('th'));
+  COLS.forEach(c=>{
+    const th = document.createElement('th'); th.textContent = c; headRow.appendChild(th);
+  });
+  table.appendChild(headRow);
+
+  for(let r=1;r<=ROWS;r++){
+    const tr = document.createElement('tr');
+    const rh = document.createElement('td');
+    rh.className='rowhead'; rh.textContent = r;
+    tr.appendChild(rh);
+    COLS.forEach(c=>{
+      const ref = c+r;
+      const td = document.createElement('td');
+      td.className='cell'; td.dataset.ref=ref;
+      const inner = document.createElement('div');
+      inner.className='inner';
+      inner.contentEditable = true;
+      inner.addEventListener('focus', ()=>selectCell(ref));
+      inner.addEventListener('blur', ()=>commitCell(ref, inner.textContent));
+      inner.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter'){ e.preventDefault(); inner.blur(); moveSelection(ref,1,0); }
+      });
+      td.appendChild(inner);
+      tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  }
+}
+
+function moveSelection(ref, dr, dc){
+  const col = ref[0], row = parseInt(ref.slice(1));
+  const ci = COLS.indexOf(col);
+  const nCol = COLS[Math.min(COLS.length-1, Math.max(0, ci+dc))];
+  const nRow = Math.min(ROWS, Math.max(1, row+dr));
+  const nextRef = nCol+nRow;
+  const cellDiv = document.querySelector(`td[data-ref="${nextRef}"] .inner`);
+  if(cellDiv) cellDiv.focus();
+}
+
+function selectCell(ref){
+  selectedRef = ref;
+  document.querySelectorAll('td.cell').forEach(td=>td.classList.toggle('selected', td.dataset.ref===ref));
+  document.getElementById('active-ref').textContent = ref;
+  const fInput = document.getElementById('formula-input');
+  fInput.value = data[ref] || '';
+  liveFormulaEl.textContent = data[ref] || '(vacío)';
+}
+
+document.getElementById('formula-input').addEventListener('input', (e)=>{
+  data[selectedRef] = e.target.value;
+  const inner = document.querySelector(`td[data-ref="${selectedRef}"] .inner`);
+  if(inner) inner.textContent = e.target.value;
+  liveFormulaEl.textContent = e.target.value || '(vacío)';
+  recalcAll();
+});
+document.getElementById('formula-input').addEventListener('keydown',(e)=>{
+  if(e.key==='Enter'){ document.querySelector(`td[data-ref="${selectedRef}"] .inner`)?.focus(); }
+});
+
+function commitCell(ref, val){
+  data[ref] = val;
+  recalcAll();
+}
+
+/* ---- formula evaluation ---- */
+function colToIndex(letters){
+  let idx=0;
+  for(const ch of letters){ idx = idx*26 + (ch.charCodeAt(0)-64); }
+  return idx;
+}
+function expandRange(a,b){
+  const mA = a.match(/^([A-Z]+)(\d+)$/), mB = b.match(/^([A-Z]+)(\d+)$/);
+  if(!mA || !mB) return [];
+  const c1=colToIndex(mA[1]), c2=colToIndex(mB[1]);
+  const r1=parseInt(mA[2]), r2=parseInt(mB[2]);
+  const cells=[];
+  for(let c=Math.min(c1,c2); c<=Math.max(c1,c2); c++){
+    for(let r=Math.min(r1,r2); r<=Math.max(r1,r2); r++){
+      cells.push(COLS[c-1]+r);
+    }
+  }
+  return cells;
+}
+
+let evalDepth = 0;
+function getNumericValue(ref){
+  if(evalDepth > 25) return NaN; // guard against circular refs
+  const raw = (data[ref]||'').trim();
+  if(raw==='') return null;
+  if(raw.startsWith('=')){
+    evalDepth++;
+    const v = evaluateFormula(raw.slice(1));
+    evalDepth--;
+    return v;
+  }
+  const n = parseFloat(raw);
+  return isNaN(n) ? null : n;
+}
+
+function evaluateFormula(expr){
+  try{
+    let e = expr.toUpperCase().replace(/\s+/g,'');
+    // handle functions with ranges: SUMA/PROMEDIO/MAX/MIN/CONTAR
+    const funcMap = {SUMA:'sum', SUM:'sum', PROMEDIO:'avg', AVERAGE:'avg', MAX:'max', MIN:'min', CONTAR:'count', COUNT:'count'};
+    const funcRegex = /(SUMA|SUM|PROMEDIO|AVERAGE|MAX|MIN|CONTAR|COUNT)\(([A-Z]+\d+):([A-Z]+\d+)\)/;
+    let guard = 0;
+    while(funcRegex.test(e) && guard < 20){
+      guard++;
+      e = e.replace(funcRegex, (m, fn, c1, c2)=>{
+        const refs = expandRange(c1,c2);
+        const vals = refs.map(getNumericValue).filter(v=>v!==null && !isNaN(v));
+        let res = 0;
+        const kind = funcMap[fn];
+        if(kind==='sum') res = vals.reduce((a,b)=>a+b,0);
+        else if(kind==='avg') res = vals.length? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+        else if(kind==='max') res = vals.length? Math.max(...vals) : 0;
+        else if(kind==='min') res = vals.length? Math.min(...vals) : 0;
+        else if(kind==='count') res = vals.length;
+        return String(res);
+      });
+    }
+    // replace remaining single cell refs
+    e = e.replace(/[A-Z]+\d+/g, (ref)=>{
+      const v = getNumericValue(ref);
+      return v===null || isNaN(v) ? '0' : String(v);
+    });
+    // validate only safe chars remain
+    if(!/^[0-9+\-*/().]+$/.test(e)) return NaN;
+    // eslint-disable-next-line no-eval
+    const result = Function('"use strict";return ('+e+')')();
+    return typeof result === 'number' && isFinite(result) ? Math.round(result*10000)/10000 : NaN;
+  }catch(err){
+    return NaN;
+  }
+}
+
+function recalcAll(){
+  document.querySelectorAll('td.cell').forEach(td=>{
+    const ref = td.dataset.ref;
+    const raw = (data[ref]||'').trim();
+    const inner = td.querySelector('.inner');
+    td.classList.remove('err');
+    if(raw.startsWith('=')){
+      const v = evaluateFormula(raw.slice(1));
+      if(isNaN(v)){ inner.textContent = '#ERROR'; td.classList.add('err'); }
+      else { inner.textContent = v; }
+    } else {
+      // leave raw text/number as-is, but don't overwrite while user is typing in it
+      if(document.activeElement !== inner) inner.textContent = raw;
+    }
+  });
+}
+
+function loadSampleData(){
+  clearSheet(false);
+  const notas = [12,15,9,18,14];
+  notas.forEach((n,i)=>{ data['A'+(i+1)] = String(n); });
+  data['B1'] = '=PROMEDIO(A1:A5)';
+  recalcAll();
+  syncCellsFromData();
+}
+function clearSheet(recalc=true){
+  Object.keys(data).forEach(k=>delete data[k]);
+  syncCellsFromData();
+  if(recalc) recalcAll();
+}
+function syncCellsFromData(){
+  document.querySelectorAll('td.cell').forEach(td=>{
+    const ref = td.dataset.ref;
+    td.querySelector('.inner').textContent = data[ref] || '';
+  });
+  if(selectedRef){
+    document.getElementById('formula-input').value = data[selectedRef] || '';
+  }
+}
+
+buildSheet();
+
+/* ---------------- Quiz ---------------- */
+const quizData = [
+  {q:'¿Con qué símbolo tiene que empezar siempre una fórmula en Excel?', options:['#','=','@','&'], correct:1},
+  {q:'¿Qué referencia corresponde a la celda de la columna C, fila 4?', options:['4C','C4','C-4','4-C'], correct:1},
+  {q:'¿Qué función devuelve el promedio de un rango de celdas?', options:['SUMA','CONTAR','PROMEDIO','MAX'], correct:2},
+  {q:'¿Qué significa el rango A1:A5?', options:['Las celdas A1 y A5 solamente','Todas las celdas desde A1 hasta A5','La celda A1 multiplicada por 5','Un error de escritura'], correct:1},
+  {q:'Si escribís =A1+A2/2 en vez de =(A1+A2)/2, ¿qué pasa?', options:['Da exactamente el mismo resultado','Excel no permite esa fórmula','El orden de las operaciones cambia el resultado','Se suma primero automáticamente'], correct:2},
+];
+const quizContainer = document.getElementById('quiz-container');
+quizData.forEach((q,i)=>{
+  const div = document.createElement('div');
+  div.className='quiz-q';
+  div.innerHTML = `<p class="qtext">${i+1}. ${q.q}</p>
+    <div class="quiz-options">
+      ${q.options.map((o,oi)=>`<label><input type="radio" name="q${i}" value="${oi}"> ${o}</label>`).join('')}
+    </div>`;
+  quizContainer.appendChild(div);
+});
+function checkQuiz(){
+  let score=0;
+  quizData.forEach((q,i)=>{
+    const sel = document.querySelector(`input[name="q${i}"]:checked`);
+    const labels = document.querySelectorAll(`.quiz-q:nth-child(${i+1}) .quiz-options label`);
+    labels.forEach((l,li)=>{
+      l.style.borderColor='';
+      l.style.background='';
+      if(li===q.correct){ l.style.borderColor='#0F6B5C'; l.style.background='#EAF3F0'; }
+    });
+    if(sel && parseInt(sel.value)===q.correct){
+      score++;
+    } else if(sel){
+      sel.closest('label').style.borderColor='#E4572E';
+      sel.closest('label').style.background='#FDF1EC';
+    }
+  });
+  const scoreEl = document.getElementById('quiz-score');
+  scoreEl.classList.add('show');
+  let msg = `Puntaje: ${score} / ${quizData.length}`;
+  if(score===quizData.length) msg += ' — ¡Excelente, dominás lo básico de Excel! 🎉';
+  else if(score>=3) msg += ' — Bien, repasá las que fallaste y volvé a intentar.';
+  else msg += ' — Repasá las lecciones 1 a 5 y volvé a intentar.';
+  scoreEl.textContent = msg;
+}
+</script>
+</body>
+</html>
